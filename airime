@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>airime</title>
+    <style>
+        body {
+            background-color: #1a001a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #2c002c;
+        }
+
+        .search-bar input {
+            width: 100%; /* スマホ用に幅を100%に変更 */
+            padding: 5px;
+            border: none;
+            border-radius: 3px;
+            background-color: #4c004c;
+            color: #ffffff;
+        }
+
+        .profile-icon {
+            font-size: 24px;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        section {
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+            color: #d4a1d4;
+        }
+
+        .video-thumbnails {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .video-thumbnails div {
+            width: 100%; /* スマホ用に幅を100%に変更 */
+            margin-bottom: 10px;
+        }
+
+        .video-thumbnails img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+
+        .upload {
+            padding: 20px;
+            background-color: #2c002c;
+        }
+
+        .upload input[type="file"],
+        .upload input[type="text"] {
+            width: calc(100% - 20px); /* スマホ用に幅を調整 */
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #d4a1d4;
+            color: #1a001a;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .upload input[type="text"] {
+            width: 100%; /* スマホ用に幅を100%に変更 */
+        }
+
+        #videoPlayerContainer header {
+            background-color: #2c002c;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #videoPlayerContainer main {
+            padding: 20px;
+            display: flex;
+            flex-direction: column; /* スマホ用に列に変更 */
+            align-items: center; /* 中央揃え */
+        }
+
+        #videoPlayer {
+            width: 100%; /* スマホ用に幅を100%に変更 */
+            max-width: 100%; /* 余白が出ないように */
+            height: auto; /* アスペクト比を保つ */
+        }
+
+        .video-details {
+            padding: 20px;
+            background-color: #1a001a;
+            color: #ffffff;
+            width: 100%; /* スマホ用に幅を100%に変更 */
+        }
+
+        .video-details h2 {
+            margin: 0;
+            color: #d4a1d4;
+        }
+
+        .video-details p {
+            margin: 10px 0;
+        }
+
+        .video-details .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%; /* スマホ用に幅を100%に変更 */
+        }
+
+        .video-details .actions button {
+            width: 48%; /* スマホ用にボタンの幅を調整 */
+        }
+
+        .back-button {
+            width: 100%; /* スマホ用に幅を100%に変更 */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="search-bar">
+            <input type="text" placeholder="検索...">
+        </div>
+        <div class="profile-icon">👤</div>
+    </header>
+    <main>
+        <section class="video-list">
+            <h2>Videos</h2>
+            <div class="video-thumbnails" id="videoThumbnails">
+                <!-- サムネイルをここに追加 -->
+            </div>
+        </section>
+    </main>
+
+    <div id="videoPlayerContainer" style="display:none;">
+        <header>
+            <h1>動画再生</h1>
+            <button onclick="hideVideoPlayer()">×</button>
+        </header>
+        <main>
+            <video id="videoPlayer" controls></video>
+            <div class="video-details">
+                <h2 id="videoTitle">動画タイトル</h2>
+                <p id="videoDescription">すごい動画！</p>
+                <div class="actions">
+                    <button onclick="likeVideo()">👍 いいね</button>
+                    <button onclick="dislikeVideo()">👎 よくない</button>
+                </div>
+            </div>
+        </main>
+        <button class="back-button" onclick="hideVideoPlayer()">戻る</button>
+    </div>
+
+    <section class="upload">
+        <h2>動画をアップロード</h2>
+        <input type="file" id="videoUpload" accept="video/*">
+        <input type="file" id="thumbnailUpload" accept="image/*">
+        <input type="text" id="videoTitleInput" placeholder="動画タイトルを入力してください">
+        <button onclick="handleUpload()">アップロード</button>
+    </section>
+
+    <script>
+        document.getElementById('videoUpload').addEventListener('change', handleFileSelect);
+        document.getElementById('thumbnailUpload').addEventListener('change', handleFileSelect);
+
+        let uploadedVideos = JSON.parse(localStorage.getItem('videos')) || [];
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            const id = event.target.id;
+            if (id === 'videoUpload') {
+                handleVideoUpload(file);
+            } else if (id === 'thumbnailUpload') {
+                handleThumbnailUpload(file);
+            }
+        }
+
+        function handleVideoUpload(file) {
+            const videoUrl = URL.createObjectURL(file);
+            document.getElementById('videoUpload').dataset.url = videoUrl;
+        }
+
+        function handleThumbnailUpload(file) {
+            const thumbnailUrl = URL.createObjectURL(file);
+            document.getElementById('thumbnailUpload').dataset.url = thumbnailUrl;
+        }
+
+        function handleUpload() {
+            const videoUrl = document.getElementById('videoUpload').dataset.url;
+            const thumbnailUrl = document.getElementById('thumbnailUpload').dataset.url;
+            const title = document.getElementById('videoTitleInput').value;
+            if (videoUrl && thumbnailUrl && title) {
+                uploadedVideos.push({ url: videoUrl, title: title, thumbnail: thumbnailUrl });
+                localStorage.setItem('videos', JSON.stringify(uploadedVideos));
+                createThumbnail(videoUrl, thumbnailUrl, title);
+                clearUploadFields();
+            } else {
+                alert('動画とサムネイルを選択し、タイトルを入力してください！');
+            }
+        }
+
+        function createThumbnail(videoUrl, thumbnailUrl, title) {
+            const thumbnailContainer = document.getElementById('videoThumbnails');
+            const div = document.createElement('div');
+            const img = document.createElement('img');
+            img.src = thumbnailUrl;
+            img.alt = title;
+            img.onclick = () => {
+                showVideoPlayer(videoUrl, title);
+            };
+            const p = document.createElement('p');
+            p.textContent = title;
+            div.appendChild(img);
+            div.appendChild(p);
+            thumbnailContainer.appendChild(div);
+        }
+
+        function showVideoPlayer(url, title) {
+            document.querySelector('main').style.display = 'none';
+            document.getElementById('videoPlayerContainer').style.display = 'block';
+            document.getElementById('videoPlayer').src = url;
+            document.getElementById('videoTitle').textContent = title;
+            document.getElementById('videoDescription').textContent = "動画の説明がここに表示されます。";
+        }
+
+        function hideVideoPlayer() {
+            document.getElementById('videoPlayerContainer').style.display = 'none';
+            document.querySelector('main').style.display = 'block';
+        }
+
+        function likeVideo() {
+            alert("いいねしました！");
+        }
+
+        function dislikeVideo() {
+            alert("よくないねしました！");
+        }
+
+        function clearUploadFields() {
+            document.getElementById('videoUpload').value = '';
+            document.getElementById('thumbnailUpload').value = '';
+            document.getElementById('videoTitleInput').value = '';
+            document.getElementById('videoUpload').dataset.url = '';
+            document.getElementById('thumbnailUpload').dataset.url = '';
+        }
+
+        window.onload = () => {
+            uploadedVideos.forEach(video => {
+                createThumbnail(video.url, video.thumbnail, video.title);
+            });
+        };
+    </script>
+</body>
+</html>
