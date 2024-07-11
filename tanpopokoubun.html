@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>単語変換</title>
+</head>
+<body>
+    <h1>単語を変換しようぶー</h1>
+    <textarea id="inputText" rows="10" cols="50" placeholder="ここにテキストを入力してぶー"></textarea>
+    <button onclick="convertWords()">変換ぶー</button>
+    <p>変換後のテキスト:</p>
+    <textarea id="outputText" rows="10" cols="50" readonly></textarea>
+
+    <script>
+        function convertWords() {
+            let inputText = document.getElementById('inputText').value;
+
+            // ここに変換したい単語とその置き換え単語を追加するぶー
+            let wordMap = {
+                "あ": "た",
+                "い": "ん",
+                "う": "ぽ",
+                "え": "ぽ",
+                "お": "だ",
+                "か": "い",
+                "き": "す",
+                "く": "き",
+                "け": "な",
+                "こ": "ひ",
+                "さ": "と",
+                "し": "は",
+                "す": "む",
+                "せ": "ぶ",
+                "そ": "が",
+                "た": "い",
+                "ち": "ち",
+                "つ": "ば",
+                "て": "ん",
+                "と": "す",
+                "な": "き",
+                "に": "で",
+                "ぬ": "す",
+                "ね": "ま",
+                "の": "る",
+                "は": "か",
+                "ひ": "っ",
+                "ふ": "こ",
+                "へ": "ば",
+                "ほ": "か",
+                "ま": "ゃ",
+                "み": "な",
+                "む": "む",
+                "め": "か",
+                "も": "こ",
+                "や": "れ",
+                "ゆ": "ぁ",
+                "よ": "ま",
+                "ら": "じ",
+                "り": "で",
+                "る": "え",
+                "れ": "ー",
+                "ろ": "ぇ",
+                "わ": "と",
+                "を": "わ",
+                "ん": "え"
+            };
+
+            let outputText = inputText;
+            for (let key in wordMap) {
+                let regex = new RegExp(key, 'g');
+                outputText = outputText.replace(regex, wordMap[key]);
+            }
+
+            document.getElementById('outputText').value = outputText;
+        }
+    </script>
+</body>
+</html>
